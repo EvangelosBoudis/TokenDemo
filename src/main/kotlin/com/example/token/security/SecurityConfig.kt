@@ -2,6 +2,7 @@ package com.example.token.security
 
 import com.example.token.security.filters.TokenAuthenticationFilter
 import com.example.token.security.filters.TokenAuthorizationFilter
+import com.example.token.security.utils.TokenManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
+    private val tokenManager: TokenManager,
     private val userDetailsService: UserDetailsService,
     private val bCryptPasswordEncoder: BCryptPasswordEncoder
 ) : WebSecurityConfigurerAdapter() {
@@ -31,18 +33,15 @@ class SecurityConfig(
     override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()
 
     override fun configure(http: HttpSecurity) {
-
-        /*
-        * http.formLogin().disable()
-        http.logout().disable()*/
-
         http.csrf().disable()
+            .formLogin().disable()
+            .logout().disable()
             .sessionManagement().sessionCreationPolicy(STATELESS)
             .and().authorizeRequests().antMatchers("/auth/**").permitAll()
             .and().authorizeRequests().antMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN")
-            //.and().authorizeRequests().anyRequest().authenticated()
+            .and().authorizeRequests().anyRequest().authenticated()
             .and().addFilterBefore(
-                TokenAuthenticationFilter(authenticationManagerBean()),
+                TokenAuthenticationFilter(tokenManager, authenticationManagerBean()),
                 UsernamePasswordAuthenticationFilter::class.java
             ).addFilterBefore(
                 TokenAuthorizationFilter(),
