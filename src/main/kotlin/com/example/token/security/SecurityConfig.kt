@@ -44,7 +44,7 @@ class SecurityConfig(
                 TokenAuthenticationFilter(tokenManager, authenticationManagerBean()),
                 UsernamePasswordAuthenticationFilter::class.java
             ).addFilterBefore(
-                TokenAuthorizationFilter(),
+                TokenAuthorizationFilter(tokenManager),
                 UsernamePasswordAuthenticationFilter::class.java
             )
     }

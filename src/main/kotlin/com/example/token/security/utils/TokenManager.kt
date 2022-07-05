@@ -7,15 +7,17 @@ interface TokenManager {
     fun createAccessToken(
         user: User,
         requestUrl: String,
-        expirationMinutes: Long,
-        secretKey: String
+        expirationMinutes: Long
     ): String
 
     fun createRefreshToken(
         user: User,
         requestUrl: String,
-        expirationMinutes: Long,
-        secretKey: String
+        expirationMinutes: Long
     ): String
+
+    fun decodedTokenFromHeader(
+        header: String
+    ): DecodedToken
 
 }

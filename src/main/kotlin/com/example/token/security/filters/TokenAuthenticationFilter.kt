@@ -43,8 +43,8 @@ class TokenAuthenticationFilter(
     ) {
         val user = authentication.principal as User
         val requestUrl = request.requestURL.toString()
-        val accessToken = tokenManager.createAccessToken(user, requestUrl, 10, "secret")
-        val refreshToken = tokenManager.createRefreshToken(user, requestUrl, 30, "secret")
+        val accessToken = tokenManager.createAccessToken(user, requestUrl, 10)
+        val refreshToken = tokenManager.createRefreshToken(user, requestUrl, 30)
 
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(
