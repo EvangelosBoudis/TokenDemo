@@ -6,7 +6,6 @@ import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import javax.servlet.FilterChain
@@ -41,11 +40,9 @@ class TokenAuthenticationFilter(
         chain: FilterChain,
         authentication: Authentication
     ) {
-        val user = authentication.principal as User
         val requestUrl = request.requestURL.toString()
-        val accessToken = tokenManager.createAccessToken(user, requestUrl, 10)
-        val refreshToken = tokenManager.createRefreshToken(user, requestUrl, 30)
-
+        val accessToken = tokenManager.createAccessToken(authentication, requestUrl, 10)
+        val refreshToken = tokenManager.createRefreshToken(authentication, requestUrl, 30)
         response.contentType = APPLICATION_JSON_VALUE
         ObjectMapper().writeValue(
             response.outputStream, mapOf(

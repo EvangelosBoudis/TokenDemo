@@ -1,5 +1,6 @@
 package com.example.token.domain.data
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import javax.persistence.*
@@ -16,6 +17,12 @@ data class UserData(
     val roles: MutableCollection<RoleData> = mutableSetOf()
 ) {
     fun asDetailedUser() = User(
+        username,
+        password,
+        roles.map { SimpleGrantedAuthority(it.name) }
+    )
+
+    fun asUsernamePasswordAuthenticationToken() = UsernamePasswordAuthenticationToken(
         username,
         password,
         roles.map { SimpleGrantedAuthority(it.name) }

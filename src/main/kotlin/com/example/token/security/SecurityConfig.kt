@@ -6,27 +6,25 @@ import com.example.token.security.utils.TokenManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
     private val tokenManager: TokenManager,
-    private val userDetailsService: UserDetailsService,
-    private val bCryptPasswordEncoder: BCryptPasswordEncoder
+    private val authenticationProvider: AuthenticationProvider,
 ) : WebSecurityConfigurerAdapter() {
 
     override fun configure(auth: AuthenticationManagerBuilder) {
-        auth
-            .userDetailsService(userDetailsService)
-            .passwordEncoder(bCryptPasswordEncoder)
+        auth.authenticationProvider(authenticationProvider)
+        // Required constructor Beans: UserDetailsService, BCryptPasswordEncoder
+        // auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder)
     }
 
     @Bean

@@ -4,8 +4,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -13,16 +13,16 @@ import java.util.*
 class TokenManagerImpl : TokenManager {
 
     override fun createAccessToken(
-        user: User,
+        authentication: Authentication,
         requestUrl: String,
         expirationMinutes: Long
     ): String {
         try {
             return JWT.create()
-                .withSubject(user.username)
+                .withSubject(authentication.name)
                 .withExpiresAt(Date(System.currentTimeMillis() + expirationMinutes * 60 * 1000))
                 .withIssuer(requestUrl)
-                .withClaim("roles", user.authorities.map { it.authority }.toList())
+                .withClaim("roles", authentication.authorities.map { it.authority }.toList())
                 .sign(Algorithm.HMAC256(SECRET_KEY.toByteArray()))
         } catch (e: Exception) {
             throw TokenException(e)
@@ -30,13 +30,13 @@ class TokenManagerImpl : TokenManager {
     }
 
     override fun createRefreshToken(
-        user: User,
+        authentication: Authentication,
         requestUrl: String,
         expirationMinutes: Long
     ): String {
         try {
             return JWT.create()
-                .withSubject(user.username)
+                .withSubject(authentication.name)
                 .withExpiresAt(Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .withIssuer(requestUrl)
                 .sign(Algorithm.HMAC256(SECRET_KEY.toByteArray()))

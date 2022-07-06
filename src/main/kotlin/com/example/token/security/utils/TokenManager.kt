@@ -1,17 +1,17 @@
 package com.example.token.security.utils
 
-import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.Authentication
 
 interface TokenManager {
 
     fun createAccessToken(
-        user: User,
+        authentication: Authentication,
         requestUrl: String,
         expirationMinutes: Long
     ): String
 
     fun createRefreshToken(
-        user: User,
+        authentication: Authentication,
         requestUrl: String,
         expirationMinutes: Long
     ): String
