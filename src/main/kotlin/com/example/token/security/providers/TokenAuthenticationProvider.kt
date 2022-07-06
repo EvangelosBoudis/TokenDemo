@@ -1,15 +1,15 @@
 package com.example.token.security.providers
 
 import com.example.token.repo.UserRepo
+import com.example.token.security.utils.AuthenticationToken
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
 @Component
-class DatabaseAuthenticationProvider(
+class TokenAuthenticationProvider(
     private val userRepo: UserRepo,
     private val passwordEncoder: PasswordEncoder
 ) : AuthenticationProvider {
@@ -20,10 +20,10 @@ class DatabaseAuthenticationProvider(
             authentication.credentials.toString(),
             user.password
         )
-        return if (passMatches) user.asUsernamePasswordAuthenticationToken()
+        return if (passMatches) user.asAuthenticationToken()
         else throw BadCredentialsException("Database authentication failed")
     }
 
     override fun supports(authentication: Class<*>) =
-        authentication == UsernamePasswordAuthenticationToken::class.java
+        authentication == AuthenticationToken::class.java
 }

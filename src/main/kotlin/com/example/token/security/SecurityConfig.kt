@@ -1,8 +1,8 @@
 package com.example.token.security
 
 import com.example.token.security.filters.TokenAuthenticationFilter
-import com.example.token.security.filters.TokenAuthorizationFilter
-import com.example.token.security.utils.TokenManager
+import com.example.token.security.filters.TokenVerificationFilter
+import com.example.token.security.managers.TokenManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -34,17 +34,21 @@ class SecurityConfig(
         http.csrf().disable()
             .formLogin().disable()
             .logout().disable()
+            .httpBasic().disable()
             .sessionManagement().sessionCreationPolicy(STATELESS)
-            .and().authorizeRequests().antMatchers("/auth/**").permitAll()
-            .and().authorizeRequests().antMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN")
-            .and().authorizeRequests().anyRequest().authenticated()
-            .and().addFilterBefore(
+            .and()
+            .addFilterBefore(
                 TokenAuthenticationFilter(tokenManager, authenticationManagerBean()),
                 UsernamePasswordAuthenticationFilter::class.java
-            ).addFilterBefore(
-                TokenAuthorizationFilter(tokenManager),
-                UsernamePasswordAuthenticationFilter::class.java
             )
+            .addFilterAfter(
+                TokenVerificationFilter(tokenManager),
+                TokenAuthenticationFilter::class.java
+            )
+            .authorizeRequests()
+            .antMatchers("/auth/**").permitAll()
+            .antMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN")
+            .anyRequest().authenticated()
     }
 
 }

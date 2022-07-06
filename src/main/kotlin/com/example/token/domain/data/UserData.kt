@@ -1,6 +1,6 @@
 package com.example.token.domain.data
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import com.example.token.security.utils.AuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import javax.persistence.*
@@ -22,7 +22,7 @@ data class UserData(
         roles.map { SimpleGrantedAuthority(it.name) }
     )
 
-    fun asUsernamePasswordAuthenticationToken() = UsernamePasswordAuthenticationToken(
+    fun asAuthenticationToken() = AuthenticationToken(
         username,
         password,
         roles.map { SimpleGrantedAuthority(it.name) }
