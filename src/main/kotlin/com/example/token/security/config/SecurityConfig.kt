@@ -8,6 +8,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
 
 @Configuration
 class SecurityConfig(
@@ -38,6 +41,19 @@ class SecurityConfig(
             .antMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN")
             .anyRequest().authenticated()
         return http.build()
+    }
+
+    @Bean
+    fun corsFilter(): CorsFilter {
+        val source = UrlBasedCorsConfigurationSource()
+        val config = CorsConfiguration().apply {
+            allowCredentials = true
+            addAllowedOrigin("*")
+            addAllowedHeader("*")
+            addAllowedMethod("*")
+        }
+        source.registerCorsConfiguration("/**", config)
+        return CorsFilter(source)
     }
 
 }
