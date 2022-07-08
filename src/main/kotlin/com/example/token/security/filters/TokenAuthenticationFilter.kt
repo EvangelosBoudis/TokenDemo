@@ -12,6 +12,8 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+// This Filter is not used by SecurityConfig, just ignore it
+
 class TokenAuthenticationFilter(
     private val tokenManager: TokenManager,
     authenticationManager: AuthenticationManager,
@@ -37,16 +39,12 @@ class TokenAuthenticationFilter(
         chain: FilterChain,
         authentication: Authentication
     ) {
-        val requestUrl = request.requestURL.toString()
-        val accessToken = tokenManager.createAccessToken(authentication, requestUrl, 10)
-        val refreshToken = tokenManager.createRefreshToken(authentication, requestUrl, 30)
-        response.contentType = APPLICATION_JSON_VALUE
-        ObjectMapper().writeValue(
-            response.outputStream, mapOf(
-                "access_token" to accessToken,
-                "refresh_token" to refreshToken,
-            )
+        val tokenDto = tokenManager.createTokenDto(
+            authentication,
+            request.requestURL.toString()
         )
+        response.contentType = APPLICATION_JSON_VALUE
+        ObjectMapper().writeValue(response.outputStream, tokenDto)
     }
 
     // unsuccessfulAuthentication (count unsuccessful logins)
