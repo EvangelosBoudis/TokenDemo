@@ -1,6 +1,7 @@
 package com.example.token.security.config
 
 import com.example.token.security.managers.TokenManager
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -11,10 +12,13 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
+import org.springframework.web.servlet.HandlerExceptionResolver
 
 @Configuration
 class SecurityConfig(
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    @Qualifier("handlerExceptionResolver")
+    private val resolver: HandlerExceptionResolver
 ) {
 
     @Bean
@@ -34,7 +38,7 @@ class SecurityConfig(
             .httpBasic().disable()
             .sessionManagement().sessionCreationPolicy(STATELESS)
             .and()
-            .apply(TokenConfig(tokenManager))
+            .apply(FiltersConfig(tokenManager, resolver))
             .and()
             .authorizeRequests()
             .antMatchers("/auth/**").permitAll()
