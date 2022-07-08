@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.example.token.security.utils.DecodedToken
 import com.example.token.security.utils.TokenException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
@@ -13,6 +14,9 @@ import java.util.*
 
 @Component
 class TokenManagerImpl : TokenManager {
+
+    @Value("\${jwt.secret}")
+    private lateinit var secretKey: String
 
     override fun createAccessToken(
         authentication: Authentication,
@@ -25,7 +29,7 @@ class TokenManagerImpl : TokenManager {
                 .withExpiresAt(Date(System.currentTimeMillis() + expirationMinutes * 60 * 1000))
                 .withIssuer(requestUrl)
                 .withClaim("roles", authentication.authorities.map { it.authority }.toList())
-                .sign(Algorithm.HMAC256(SECRET_KEY.toByteArray()))
+                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
         } catch (e: Exception) {
             throw TokenException(e)
         }
@@ -41,7 +45,7 @@ class TokenManagerImpl : TokenManager {
                 .withSubject(authentication.name)
                 .withExpiresAt(Date(System.currentTimeMillis() + 30 * 60 * 1000))
                 .withIssuer(requestUrl)
-                .sign(Algorithm.HMAC256(SECRET_KEY.toByteArray()))
+                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
         } catch (e: Exception) {
             throw TokenException(e)
         }
@@ -63,16 +67,12 @@ class TokenManagerImpl : TokenManager {
     ): DecodedJWT {
         try {
             return JWT
-                .require(Algorithm.HMAC256(SECRET_KEY.toByteArray()))
+                .require(Algorithm.HMAC256(secretKey.toByteArray()))
                 .build()
                 .verify(header.substring("Bearer ".length))
         } catch (e: JWTVerificationException) {
             throw TokenException(e)
         }
-    }
-
-    companion object {
-        private const val SECRET_KEY = "secret-key"
     }
 
 }
