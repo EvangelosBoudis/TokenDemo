@@ -4,8 +4,9 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.example.token.domain.dto.TokenDto
 import com.example.token.security.utils.DecodedToken
-import com.example.token.security.utils.TokenException
+import com.example.token.exceptions.TokenException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -13,42 +14,18 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class TokenManagerImpl : TokenManager {
+class TokenManagerImpl(
+    @Value("\${jwt.secret}") private val secretKey: String
+) : TokenManager {
 
-    @Value("\${jwt.secret}")
-    private lateinit var secretKey: String
-
-    override fun createAccessToken(
+    override fun createTokenDto(
         authentication: Authentication,
-        requestUrl: String,
-        expirationMinutes: Long
-    ): String {
-        try {
-            return JWT.create()
-                .withSubject(authentication.name)
-                .withExpiresAt(Date(System.currentTimeMillis() + expirationMinutes * 60 * 1000))
-                .withIssuer(requestUrl)
-                .withClaim("roles", authentication.authorities.map { it.authority }.toList())
-                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
-        } catch (e: Exception) {
-            throw TokenException(e)
-        }
-    }
-
-    override fun createRefreshToken(
-        authentication: Authentication,
-        requestUrl: String,
-        expirationMinutes: Long
-    ): String {
-        try {
-            return JWT.create()
-                .withSubject(authentication.name)
-                .withExpiresAt(Date(System.currentTimeMillis() + 30 * 60 * 1000))
-                .withIssuer(requestUrl)
-                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
-        } catch (e: Exception) {
-            throw TokenException(e)
-        }
+        requestUrl: String
+    ): TokenDto {
+        return TokenDto(
+            createAccessToken(authentication, requestUrl),
+            createRefreshToken(authentication, requestUrl)
+        )
     }
 
     override fun decodedTokenFromHeader(
@@ -62,6 +39,39 @@ class TokenManagerImpl : TokenManager {
         return DecodedToken(token.subject, authorities)
     }
 
+    fun createAccessToken(
+        authentication: Authentication,
+        requestUrl: String,
+        expMinutes: Long = 10
+    ): String {
+        try {
+            return JWT.create()
+                .withSubject(authentication.name)
+                .withExpiresAt(Date(System.currentTimeMillis() + expMinutes * 60 * 1000))
+                .withIssuer(requestUrl)
+                .withClaim("roles", authentication.authorities.map { it.authority }.toList())
+                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
+        } catch (ex: Exception) {
+            throw TokenException(ex)
+        }
+    }
+
+    fun createRefreshToken(
+        authentication: Authentication,
+        requestUrl: String,
+        expMinutes: Long = 30
+    ): String {
+        try {
+            return JWT.create()
+                .withSubject(authentication.name)
+                .withExpiresAt(Date(System.currentTimeMillis() + expMinutes * 60 * 1000))
+                .withIssuer(requestUrl)
+                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
+        } catch (ex: Exception) {
+            throw TokenException(ex)
+        }
+    }
+
     private fun decodedJWTFromHeader(
         header: String
     ): DecodedJWT {
@@ -70,8 +80,8 @@ class TokenManagerImpl : TokenManager {
                 .require(Algorithm.HMAC256(secretKey.toByteArray()))
                 .build()
                 .verify(header.substring("Bearer ".length))
-        } catch (e: JWTVerificationException) {
-            throw TokenException(e)
+        } catch (ex: JWTVerificationException) {
+            throw TokenException(ex)
         }
     }
 
