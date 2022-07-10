@@ -7,7 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import com.example.token.domain.dto.TokenDto
 import com.example.token.security.utils.DecodedToken
 import com.example.token.exceptions.TokenException
-import org.springframework.beans.factory.annotation.Value
+import com.example.token.security.config.TokenConfigProperties
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
@@ -15,7 +15,7 @@ import java.util.*
 
 @Component
 class TokenManagerImpl(
-    @Value("\${jwt.secret}") private val secretKey: String
+    private val tokenConfigProperties: TokenConfigProperties
 ) : TokenManager {
 
     override fun createTokenDto(
@@ -41,16 +41,15 @@ class TokenManagerImpl(
 
     fun createAccessToken(
         authentication: Authentication,
-        requestUrl: String,
-        expMinutes: Long = 10
+        requestUrl: String
     ): String {
         try {
             return JWT.create()
                 .withSubject(authentication.name)
-                .withExpiresAt(Date(System.currentTimeMillis() + expMinutes * 60 * 1000))
+                .withExpiresAt(Date(System.currentTimeMillis() + tokenConfigProperties.accessKeyMinutes * 60 * 1000))
                 .withIssuer(requestUrl)
                 .withClaim("roles", authentication.authorities.map { it.authority }.toList())
-                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
+                .sign(Algorithm.HMAC256(tokenConfigProperties.secretKey.toByteArray()))
         } catch (ex: Exception) {
             throw TokenException(ex)
         }
@@ -58,15 +57,14 @@ class TokenManagerImpl(
 
     fun createRefreshToken(
         authentication: Authentication,
-        requestUrl: String,
-        expMinutes: Long = 30
+        requestUrl: String
     ): String {
         try {
             return JWT.create()
                 .withSubject(authentication.name)
-                .withExpiresAt(Date(System.currentTimeMillis() + expMinutes * 60 * 1000))
+                .withExpiresAt(Date(System.currentTimeMillis() + tokenConfigProperties.refreshKeyMinutes * 60 * 1000))
                 .withIssuer(requestUrl)
-                .sign(Algorithm.HMAC256(secretKey.toByteArray()))
+                .sign(Algorithm.HMAC256(tokenConfigProperties.secretKey.toByteArray()))
         } catch (ex: Exception) {
             throw TokenException(ex)
         }
@@ -77,7 +75,7 @@ class TokenManagerImpl(
     ): DecodedJWT {
         try {
             return JWT
-                .require(Algorithm.HMAC256(secretKey.toByteArray()))
+                .require(Algorithm.HMAC256(tokenConfigProperties.secretKey.toByteArray()))
                 .build()
                 .verify(header.substring("Bearer ".length))
         } catch (ex: JWTVerificationException) {
