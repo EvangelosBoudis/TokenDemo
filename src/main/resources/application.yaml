@@ -1,0 +1,23 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost/mapflix_db_dev
+    username: postgres
+    password: admin
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+token:
+  secret-key: PShiKyhhIyZuND0reClocmV2am1hbGc0MDcwMnFAemoxYj1xMXhyJC1xbnVubz1naCM=
+  access-key-minutes: 10
+  refresh-key-minutes: 30
