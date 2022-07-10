@@ -2,18 +2,19 @@ package com.example.token
 
 import com.example.token.domain.data.RoleData
 import com.example.token.domain.data.UserData
+import com.example.token.security.config.TokenConfigProperties
 import com.example.token.services.UserService
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+
+// TODO: Facebook, Google-Sing in copy CouchbaseSyncGateway, integration testing/ auto documentation
 
 @SpringBootApplication
+@EnableConfigurationProperties(TokenConfigProperties::class)
 class TokenDemoApplication {
-
-    @Bean
-    fun passwordEncoder() = BCryptPasswordEncoder()
 
     @Bean
     fun run(userService: UserService): CommandLineRunner {
