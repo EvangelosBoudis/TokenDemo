@@ -4,9 +4,11 @@ import com.example.token.security.managers.TokenManager
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
@@ -48,15 +50,23 @@ class SecurityConfig(
     }
 
     @Bean
+    fun webSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer {
+            it.ignoring().antMatchers(HttpMethod.OPTIONS, "/**")
+        }
+    }
+
+    @Bean
     fun corsFilter(): CorsFilter {
-        val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration().apply {
             allowCredentials = true
             addAllowedOrigin("*")
             addAllowedHeader("*")
             addAllowedMethod("*")
         }
-        source.registerCorsConfiguration("/**", config)
+        val source = UrlBasedCorsConfigurationSource().apply {
+            registerCorsConfiguration("/**", config)
+        }
         return CorsFilter(source)
     }
 
