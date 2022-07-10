@@ -14,13 +14,14 @@ class FiltersConfig(
 ) : AbstractHttpConfigurer<FiltersConfig, HttpSecurity>() {
 
     override fun configure(http: HttpSecurity) {
-        http.addFilterBefore(ExceptionHandlerFilter(resolver), CorsFilter::class.java)
-            .addFilterAfter(TokenVerificationFilter(tokenManager), ExceptionHandlerFilter::class.java)
-
-        /*http.addFilterBefore(ExceptionHandlerFilter(resolver), LogoutFilter::class.java)
-            .addFilterBefore(TokenAuthenticationFilter(tokenManager, http.getSharedObject(AuthenticationManager::class.java)), UsernamePasswordAuthenticationFilter::class.java)
-            .addFilterAfter(TokenVerificationFilter(tokenManager), TokenAuthenticationFilter::class.java)*/
-
+        http
+            .addFilterBefore(
+                ExceptionHandlerFilter(resolver),
+                CorsFilter::class.java
+            ).addFilterAfter(
+                TokenVerificationFilter(tokenManager),
+                ExceptionHandlerFilter::class.java
+            )
     }
 
 }

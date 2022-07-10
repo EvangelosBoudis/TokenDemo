@@ -4,9 +4,6 @@ import com.example.token.domain.data.RoleData
 import com.example.token.domain.data.UserData
 import com.example.token.repositories.RoleRepository
 import com.example.token.repositories.UserRepository
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,15 +14,7 @@ class UserServiceImpl(
     private val userRepo: UserRepository,
     private val roleRepo: RoleRepository,
     private val passwordEncoder: PasswordEncoder
-) : UserService, UserDetailsService {
-
-    override fun loadUserByUsername(username: String): UserDetails {
-        try {
-            return userRepo.findByUsername(username)!!.asDetailedUser()
-        } catch (e: Exception) {
-            throw UsernameNotFoundException("User $username not found in the database")
-        }
-    }
+) : UserService {
 
     override fun saveUser(user: UserData): UserData {
         return userRepo.save(user.copy(password = passwordEncoder.encode(user.password)))

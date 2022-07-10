@@ -9,8 +9,6 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-// authenticationEntryPoint & accessDeniedHandler replacement
-
 class ExceptionHandlerFilter(
     private val resolver: HandlerExceptionResolver
 ) : OncePerRequestFilter() {
