@@ -1,5 +1,6 @@
 package com.example.token.security.filters
 
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.servlet.HandlerExceptionResolver
 import java.io.IOException
@@ -7,6 +8,8 @@ import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+
+// authenticationEntryPoint & accessDeniedHandler replacement
 
 class ExceptionHandlerFilter(
     private val resolver: HandlerExceptionResolver
@@ -21,6 +24,7 @@ class ExceptionHandlerFilter(
         try {
             filterChain.doFilter(request, response)
         } catch (ex: Exception) {
+            SecurityContextHolder.clearContext()
             resolver.resolveException(request, response, null, ex)
         }
     }
