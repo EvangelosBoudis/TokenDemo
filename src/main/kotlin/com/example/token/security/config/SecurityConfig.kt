@@ -1,6 +1,7 @@
 package com.example.token.security.config
 
 import com.example.token.security.managers.TokenManager
+import com.example.token.security.utils.Role
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -44,7 +45,7 @@ class SecurityConfig(
             .and()
             .authorizeRequests()
             .antMatchers("/auth/**").permitAll()
-            .antMatchers("/users/**").hasAnyAuthority("ROLE_ADMIN")
+            .antMatchers("/users/**").hasRole(Role.ROLE_ADMIN.text)
             .anyRequest().authenticated()
         return http.build()
     }
