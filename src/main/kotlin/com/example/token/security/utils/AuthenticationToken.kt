@@ -6,8 +6,7 @@ import org.springframework.security.core.GrantedAuthority
 data class AuthenticationToken(
     private val username: String,
     private val password: String? = null,
-    private val authorities: List<GrantedAuthority> = emptyList(),
-    private val details: Map<String, Any> = emptyMap()
+    private val authorities: List<GrantedAuthority> = emptyList()
 ) : Authentication {
     override fun getName() = username
 
@@ -15,7 +14,7 @@ data class AuthenticationToken(
 
     override fun getCredentials() = password
 
-    override fun getDetails() = details
+    override fun getDetails() = null
 
     override fun getPrincipal() = username
 
