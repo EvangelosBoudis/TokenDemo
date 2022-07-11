@@ -17,7 +17,8 @@ class UserServiceImpl(
 ) : UserService {
 
     override fun saveUser(user: UserData): UserData {
-        return userRepo.save(user.copy(password = passwordEncoder.encode(user.password)))
+        user.passwordHash = passwordEncoder.encode(user.passwordHash)
+        return userRepo.save(user)
     }
 
     override fun saveRole(role: RoleData) = roleRepo.save(role)

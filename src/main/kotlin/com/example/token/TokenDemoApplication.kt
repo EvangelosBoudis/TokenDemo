@@ -1,8 +1,11 @@
 package com.example.token
 
+import com.example.token.domain.data.ClaimData
 import com.example.token.domain.data.RoleData
 import com.example.token.domain.data.UserData
 import com.example.token.security.config.TokenConfigProperties
+import com.example.token.security.utils.Claim
+import com.example.token.security.utils.Role
 import com.example.token.services.UserService
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -19,23 +22,31 @@ class TokenDemoApplication {
     @Bean
     fun run(userService: UserService): CommandLineRunner {
         return CommandLineRunner {
-            userService.saveRole(RoleData(name = "ROLE_USER"))
-            userService.saveRole(RoleData(name = "ROLE_MANAGER"))
-            userService.saveRole(RoleData(name = "ROLE_ADMIN"))
-            userService.saveRole(RoleData(name = "ROLE_SUPER_ADMIN"))
 
-            userService.saveUser(UserData(name = "John Travolta", username = "john", password = "1234"))
-            userService.saveUser(UserData(name = "Will Smith", username = "will", password = "1234"))
-            userService.saveUser(UserData(name = "Jim Carry", username = "jim", password = "1234"))
-            userService.saveUser(UserData(name = "Arnold Schwarzenegger", username = "arnold", password = "1234"))
+            val userRole = RoleData(
+                Role.ROLE_USER.fullText, listOf(
+                    ClaimData(Claim.CLAIM_USER_READ.text),
+                    ClaimData(Claim.CLAIM_USER_UPDATE.text)
+                )
+            )
 
-            userService.addRoleToUser("john", "ROLE_USER")
-            userService.addRoleToUser("john", "ROLE_MANAGER")
-            userService.addRoleToUser("will", "ROLE_MANAGER")
-            userService.addRoleToUser("jim", "ROLE_ADMIN")
-            userService.addRoleToUser("arnold", "ROLE_SUPER_ADMIN")
-            userService.addRoleToUser("arnold", "ROLE_ADMIN")
-            userService.addRoleToUser("arnold", "ROLE_USER")
+            val adminRole = RoleData(
+                Role.ROLE_ADMIN.fullText, listOf(
+                    ClaimData(Claim.CLAIM_USER_CREATE.text),
+                    ClaimData(Claim.CLAIM_USER_DELETE.text),
+                )
+            )
+
+            val user1 = UserData("john", "john@gmail.com", "123", listOf(userRole, adminRole))
+            val user2 = UserData("will", "will@gmail.com", "123", listOf(userRole))
+            val user3 = UserData("arnold", "arnold@gmail.com", "123", listOf(adminRole))
+
+            userService.saveRole(userRole)
+            userService.saveRole(adminRole)
+
+            userService.saveUser(user1)
+            userService.saveUser(user2)
+            userService.saveUser(user3)
         }
     }
 

@@ -20,7 +20,7 @@ class TokenAuthenticationProvider(
         userRepo.findByUsername(authentication.name)?.let { user ->
             val passMatches = passwordEncoder.matches(
                 authentication.credentials.toString(),
-                user.password
+                user.passwordHash
             )
             if (passMatches) return user.asAuthenticationToken()
         }
